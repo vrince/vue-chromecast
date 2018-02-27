@@ -37,6 +37,9 @@ export default {
       setTimeout(this.initializeCastApi, 5000)
     }
   },
+  mounted() {
+    this.initializeCastApi()
+  },
   methods: {
     initializeCastApi () {
       var sessionRequest = new chrome.cast.SessionRequest(this.$data.applicationID)
