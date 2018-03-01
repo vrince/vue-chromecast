@@ -13,8 +13,7 @@ export default {
       name: 'Vue-App-Content.1',
       message: 'app content 1'
     }
-  },
-  name: 'AppContent1'
+  }
 }
 </script>
 

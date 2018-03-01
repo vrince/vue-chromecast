@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Sender from '@/components/Sender'
-import HelloWorld from '@/components/HelloWorld'
+import Sender1 from '@/components/Sender1'
+import CastConfig from '@/components/CastConfig'
 import AppContent1 from '@/components/AppContent1'
 
 Vue.use(Router)
@@ -10,13 +10,13 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Sender',
-      component: Sender
+      name: 'CastConfig',
+      component: CastConfig
     },
     {
-      path: '/hello',
-      name: 'HelloWorld',
-      component: HelloWorld
+      path: '/sender1',
+      name: 'Sender1',
+      component: Sender1
     },
     {
       path: '/app1',
