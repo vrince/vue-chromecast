@@ -10,11 +10,11 @@
 export default {
   data () {
     return {
-      name: 'Vue-App-Content.1',
-      message: 'app content 1'
+      name: 'Vue-App-Content.2',
+      message: 'app content 2'
     }
   },
-  name: 'AppContent1'
+  name: 'app2'
 }
 </script>
 
