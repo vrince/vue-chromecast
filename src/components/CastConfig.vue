@@ -4,9 +4,14 @@
       <v-layout column align-center>
         <v-btn @click="initializeCastApi">Init</v-btn>
         <v-btn @click="requestSession">Session</v-btn>
-        <v-btn @click="sendMessage">Send</v-btn>
+        <v-btn @click="sendMessage({message:'salut'})">Send</v-btn>
+        <v-btn @click="stopSession">Stop</v-btn>
       </v-layout>
     </v-slide-y-transition>
+    <v-snackbar :color="debug.color" v-if="debug.enabled" v-model="debug.snackbar">
+      <v-icon>{{debugIcon}}</v-icon>
+     {{debug.message}}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -16,68 +21,83 @@
 export default {
   data () {
     return {
-      applicationID: '550F28EC',
+      applicationId: '550F28EC',
       namespace: 'urn:x-cast:com.google.cast.vue.chromecast',
-      session: null
+      session: null,
+      initialized: false,
+      debug: {
+        enabled: true,
+        message: '',
+        snackbar: false,
+        color: ''
+      }
     }
   },
   created () {
-    let castSenderScript = document.createElement('script')
-    castSenderScript.setAttribute('src', 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js')
-    document.head.appendChild(castSenderScript)
-    // console.log(castSenderScript)
-    /* eslint-disable */
-    // console.log(chrome.cast)
-
-    const applicationID = '550F28EC'
-    const namespace = 'urn:x-cast:com.google.cast.vue.chromecast'
-    const session = null
-
-    if (!chrome.cast || !chrome.cast.isAvailable) {
-      setTimeout(this.initializeCastApi, 5000)
-    }
   },
-  mounted() {
+  mounted () {
     this.initializeCastApi()
+  },
+  computed: {
+    debugIcon: function () {
+      switch (this.debug.color) {
+        case 'info': return 'info outline'
+        case 'error': return 'error outline'
+        case 'success': return 'check'
+        default: return 'report'
+      }
+    }
   },
   methods: {
     initializeCastApi () {
-      var sessionRequest = new chrome.cast.SessionRequest(this.$data.applicationID)
-      var apiConfig = new chrome.cast.ApiConfig(sessionRequest,
-        this.sessionListener,
-        this.receiverListener)
-      chrome.cast.initialize(apiConfig, this.onInitSuccess, this.onError)
-      //console.log(chrome.cast)
+      console.log(this.applicationId)
+       // eslint-disable-next-line
+      cast.framework.CastContext.getInstance().setOptions({
+        receiverApplicationId: this.applicationId,
+        // eslint-disable-next-line
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+      })
     },
-    onInitSuccess() {
-      console.log('onInitSuccess');
+    onError (e) {
+      this.displayDebug(e)
     },
-    onError(e) {
-      console.log('onError', e);
+    receiverListener (e) {
+      this.displayDebug(e, 'error')
     },
-    sessionListener(e) {
-      console.log('sessionListener', e);
-      e.addUpdateListener(sessionUpdateListener)
-      e.addMessageListener(this.namespace, this.messageListener)
-    },
-    receiverListener(e) {
-      console.log('receiverListener', e)
-      if(e === 'available') {
-        console.info('receiver found')
-      }
-      else {
-        console.info('receiver list empty')
-      }
-    },
-    messageListener(namespace, message) {
+    messageListener (namespace, message) {
       console.log('message', namespace, message)
     },
-    requestSession() {
+    requestSession () {
       console.info('requestSession')
-      chrome.cast.requestSession(e => { console.log("yeah")}, this.onError)
+      // eslint-disable-next-line
+      chrome.cast.requestSession(session => { 
+        this.session = session
+        this.displayDebug('session success', 'success')
+      }, this.onError)
     },
-    sendMessage(message) {
+    sendMessage (message) {
       console.info('sendMessage', message)
+      if (this.session) {
+        this.session.sendMessage(this.namespace, message, this.displayDebug.bind(this, message), this.onError)
+      } else {
+        // eslint-disable-next-line
+        chrome.cast.requestSession(function (session) {
+          this.session = session
+          this.sendMessage(message)
+        }, this.onError)
+      }
+    },
+    stopSession () {
+      if (this.session) {
+        this.session.stop(e => { this.displayDebug('stop session success', 'success') }, this.onError)
+      }
+    },
+    displayDebug (message, type) {
+      if (message) {
+        this.debug.message = message
+        this.debug.snackbar = true
+        this.debug.color = type || 'primary'
+      }
     }
   }
 }

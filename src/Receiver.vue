@@ -31,6 +31,7 @@ export default {
     return {
       title: 'Vue-Receiver',
       appName: '',
+      namespace: 'urn:x-cast:com.google.cast.vue.chromecast',
       debug: {
         enabled: true,
         message: '',
@@ -40,6 +41,13 @@ export default {
     }
   },
   mounted () {
+    // eslint-disable-next-line
+    const context = cast.framework.CastReceiverContext.getInstance()
+    context.addCustomMessageListener(this.namespace, customEvent => {
+      console.log(customEvent)
+      this.displayDebug(customEvent.data)
+    })
+    context.start()
   },
   components: {
     AppContent1,
