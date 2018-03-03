@@ -8,10 +8,14 @@
 
 <script>
 export default {
+  props: {
+    message: {
+      type: Object
+    }
+  },
   data () {
     return {
-      name: 'Vue-App-Content.1',
-      message: 'app content 1'
+      name: 'Vue-App-Content.1'
     }
   }
 }

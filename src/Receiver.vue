@@ -4,16 +4,24 @@
       <v-icon>query_builder</v-icon>
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-toolbar-title>{{appName}}</v-toolbar-title>
+      <v-toolbar-title>{{currentApp}}</v-toolbar-title>
       <v-spacer/>
-       <v-btn-toggle v-model="appName">
-          <v-btn flat value="app1"><span>1</span></v-btn>
-          <v-btn flat value="app2"><span>2</span></v-btn>
-       </v-btn-toggle>
+      <v-btn @click="onEvent({ data: {message: 'test', app: 'app1'}})">Send</v-btn>
+      <v-btn @click="onEvent({ data: {select: 'app1'}})">Select</v-btn>
+      <v-btn @click="onEvent({ data: {debug: !debug.enabled}})">Debug</v-btn>
+      <v-btn-toggle v-model="currentApp">
+         <v-btn v-for="(a,i) in applications" flat :value="a.name" :key="a.name">
+           <span>{{i}}</span>
+         </v-btn>
+      </v-btn-toggle>
     </v-toolbar>
     <v-content>
-      <app-content1 v-if="appName == 'app1'"></app-content1>
-      <app-content2 name='app2' v-if="appName == 'app2'"></app-content2>
+      <template v-for="(a) in applications">
+        <component v-if="currentApp == a.name" 
+        :is="a.component" 
+        :key="a.name"
+        :message="currentApp == a.name && message.app == a.name? message : null"></component>
+      </template>
     </v-content>
     <v-snackbar color="primary" v-if="debug.enabled" v-model="debug.snackbar">
       <v-avatar size="24" color="secondary">{{debug.count}}</v-avatar>
@@ -30,8 +38,17 @@ export default {
   data () {
     return {
       title: 'Vue-Receiver',
-      appName: '',
+      currentApp: '',
       namespace: 'urn:x-cast:com.google.cast.vue.chromecast',
+      message: null,
+      applications: [ {
+        name: 'app1',
+        component: 'AppContent1'
+      }, {
+        name: 'app2',
+        component: 'AppContent2'
+      }
+      ],
       debug: {
         enabled: true,
         message: '',
@@ -43,10 +60,7 @@ export default {
   mounted () {
     // eslint-disable-next-line
     const context = cast.framework.CastReceiverContext.getInstance()
-    context.addCustomMessageListener(this.namespace, customEvent => {
-      console.log(customEvent)
-      this.displayDebug(customEvent.data)
-    })
+    context.addCustomMessageListener(this.namespace, this.onEvent)
     context.start()
   },
   components: {
@@ -59,6 +73,19 @@ export default {
     }
   },
   methods: {
+    onEvent (event) {
+      console.log(event)
+      const data = event.data
+      this.displayDebug(data)
+      // handle receiver level
+      if (data.select) {
+        this.currentApp = data.select
+      }
+      if (typeof data.debug !== 'undefined') {
+        this.debug.enabled = data.debug
+      }
+      this.message = data
+    },
     displayDebug (message) {
       if (message) {
         this.debug.message = message

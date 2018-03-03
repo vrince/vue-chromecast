@@ -2,103 +2,64 @@
   <v-container fluid>
     <v-slide-y-transition mode="out-in">
       <v-layout column align-center>
-        <v-btn @click="initializeCastApi">Init</v-btn>
-        <v-btn @click="requestSession">Session</v-btn>
-        <v-btn @click="sendMessage({message:'salut'})">Send</v-btn>
-        <v-btn @click="stopSession">Stop</v-btn>
+        <v-flex>
+          <v-card>
+            <v-toolbar dark>
+              <v-toolbar-title>Session</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn color="secondary" @click="initializeCastApi">Re-Init</v-btn>
+              <v-btn color="secondary" @click="requestSession">Request</v-btn>
+              <v-btn :disabled="!session" color="primary" @click="sendMessage({message:'salut'})">Test</v-btn>
+              <v-btn :disabled="!session" color="error" @click="stopSession">Stop</v-btn>
+            </v-toolbar>
+            <v-list two-line v-if="session">
+              <template v-for="(item, index) in sessionItems">
+                <v-subheader v-if="item.header" :key="item.header">{{ item.header }}</v-subheader>
+                <v-divider v-else-if="item.divider" :inset="item.inset" :key="index"></v-divider>
+                <v-list-tile v-else :key="item.title">
+                  <v-list-tile-content>
+                    <v-list-tile-title v-html="item.key"></v-list-tile-title>
+                    <v-list-tile-sub-title v-html="item.value"></v-list-tile-sub-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </template>
+            </v-list>
+          </v-card>
+        </v-flex>
       </v-layout>
     </v-slide-y-transition>
-    <v-snackbar :color="debug.color" v-if="debug.enabled" v-model="debug.snackbar">
-      <v-icon>{{debugIcon}}</v-icon>
-     {{debug.message}}
-    </v-snackbar>
   </v-container>
 </template>
-
-
 <script>
-
+import { mapGetters, mapActions } from 'vuex'
 export default {
   data () {
     return {
-      applicationId: '550F28EC',
-      namespace: 'urn:x-cast:com.google.cast.vue.chromecast',
-      session: null,
-      initialized: false,
-      debug: {
-        enabled: true,
-        message: '',
-        snackbar: false,
-        color: ''
-      }
     }
   },
-  created () {
-  },
-  mounted () {
-    this.initializeCastApi()
-  },
   computed: {
-    debugIcon: function () {
-      switch (this.debug.color) {
-        case 'info': return 'info outline'
-        case 'error': return 'error outline'
-        case 'success': return 'check'
-        default: return 'report'
-      }
+    ...mapGetters([
+      'applicationId',
+      'namespace',
+      'session'
+    ]),
+    sessionItems: function () {
+      console.log(this.session)
+      const items = []
+      items.push({key: 'application id', value: this.session.appId})
+      items.push({key: 'display name', value: this.session.displayName})
+      items.push({key: 'name', value: this.session.receiver.friendlyName})
+      items.push({key: 'type', value: this.session.receiver.receiverType})
+      return items
     }
   },
   methods: {
-    initializeCastApi () {
-      console.log(this.applicationId)
-       // eslint-disable-next-line
-      cast.framework.CastContext.getInstance().setOptions({
-        receiverApplicationId: this.applicationId,
-        // eslint-disable-next-line
-        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-      })
-    },
-    onError (e) {
-      this.displayDebug(e)
-    },
-    receiverListener (e) {
-      this.displayDebug(e, 'error')
-    },
-    messageListener (namespace, message) {
-      console.log('message', namespace, message)
-    },
-    requestSession () {
-      console.info('requestSession')
-      // eslint-disable-next-line
-      chrome.cast.requestSession(session => { 
-        this.session = session
-        this.displayDebug('session success', 'success')
-      }, this.onError)
-    },
-    sendMessage (message) {
-      console.info('sendMessage', message)
-      if (this.session) {
-        this.session.sendMessage(this.namespace, message, this.displayDebug.bind(this, message), this.onError)
-      } else {
-        // eslint-disable-next-line
-        chrome.cast.requestSession(function (session) {
-          this.session = session
-          this.sendMessage(message)
-        }, this.onError)
-      }
-    },
-    stopSession () {
-      if (this.session) {
-        this.session.stop(e => { this.displayDebug('stop session success', 'success') }, this.onError)
-      }
-    },
-    displayDebug (message, type) {
-      if (message) {
-        this.debug.message = message
-        this.debug.snackbar = true
-        this.debug.color = type || 'primary'
-      }
-    }
+    ...mapActions([
+      'initializeCastApi',
+      'requestSession',
+      'sendMessage',
+      'stopSession'
+    ])
   }
 }
 </script>
