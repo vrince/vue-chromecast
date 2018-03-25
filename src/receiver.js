@@ -9,9 +9,22 @@ Vue.use(Vuetify)
 
 Vue.config.productionTip = false
 
+// Import the styles too, globally
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
-  components: { App },
-  template: '<App/>'
+  components: {
+    App
+  },
+  template: '<App/>',
+  mounted: function () {
+    var vm = this
+    window.addEventListener('keyup', function (event) {
+      if (event.keyCode === 32) {
+        console.log('emit --> space-pressed')
+        vm.$emit('space-pressed', {})
+      }
+    })
+  }
 })

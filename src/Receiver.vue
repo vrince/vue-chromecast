@@ -1,14 +1,21 @@
 <template>
   <v-app dark>
-    <v-toolbar app>
+    <v-btn color="" fab dark small top left v-show="!debug.enabled"
+           @click="onEvent({ data: {debug: !debug.enabled}})">
+    </v-btn>
+    <v-toolbar app v-if="debug.enabled">
       <v-icon>query_builder</v-icon>
       <v-toolbar-title v-text="title"></v-toolbar-title>
-      <v-spacer></v-spacer>
       <v-toolbar-title>{{currentApp}}</v-toolbar-title>
-      <v-spacer/>
-      <v-btn @click="onEvent({ data: {message: 'test', app: 'app1'}})">Send</v-btn>
-      <v-btn @click="onEvent({ data: {select: 'app1'}})">Select</v-btn>
+      <v-spacer></v-spacer>
       <v-btn @click="onEvent({ data: {debug: !debug.enabled}})">Debug</v-btn>
+      <v-btn @click="onEvent({ data: {message: 'test', app: 'app1'}})">Send</v-btn>
+      <v-btn flat icon @click="onEvent({ data: {action: 'start', app: 'app1'}})"><v-icon>fas fa-play</v-icon></v-btn>
+      <v-btn flat icon @click="onEvent({ data: {action: 'pause', app: 'app1'}})"><v-icon>fa-pause</v-icon></v-btn>
+      <v-btn flat icon @click="onEvent({ data: {action: 'stop', app: 'app1'}})"><v-icon>fa-stop</v-icon></v-btn>
+      <v-btn @click="onEvent({ data: {color: 'pink', app: 'app1'}})">Color</v-btn>
+      <v-btn @click="onEvent({ data: {icon: 'fa-meh', app: 'app1'}})">Icon</v-btn>
+      <v-btn @click="onEvent({ data: {select: 'app1'}})">Select</v-btn>
       <v-btn-toggle v-model="currentApp">
          <v-btn v-for="(a,i) in applications" flat :value="a.name" :key="a.name">
            <span>{{i}}</span>
@@ -20,7 +27,7 @@
         <component v-if="currentApp == a.name" 
         :is="a.component" 
         :key="a.name"
-        :message="currentApp == a.name && message.app == a.name? message : null"></component>
+        :message="currentApp == a.name && message.app == a.name ? message : null"></component>
       </template>
     </v-content>
     <v-snackbar color="primary" v-if="debug.enabled" v-model="debug.snackbar">
@@ -33,7 +40,6 @@
 <script>
 import AppContent1 from './components/AppContent1'
 import AppContent2 from './components/AppContent2'
-
 export default {
   data () {
     return {
@@ -49,8 +55,9 @@ export default {
         component: 'AppContent2'
       }
       ],
+      dialog: false,
       debug: {
-        enabled: true,
+        enabled: false,
         message: '',
         snackbar: false,
         count: 0
