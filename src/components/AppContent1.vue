@@ -1,18 +1,17 @@
 <template>
   <v-container fluid fill-height>
-    <v-layout align-center justify-center>
+    <v-layout align-center justify-center mp-0>
       <v-progress-circular
-        :size="700"
+        :size="600"
         :width="80"
         :rotate="-90"
         :value="value"
-        :color="timer.color"
+        :style="`color:${timer.color};`"
       > 
       <v-layout column align-center>
-      <v-icon 
-        size="128px" color="error">fab {{timer.icon}}</v-icon>
-              <div v-if="elaspsed" class="display-4">{{elaspsed}}</div>
-         </v-layout>
+        <v-icon size="128px">{{timer.icon}}</v-icon>
+        <div v-if="elaspsed" class="display-4">{{elaspsed}}</div>
+      </v-layout>
       </v-progress-circular>
 
     </v-layout>
@@ -30,15 +29,15 @@ export default {
   data () {
     return {
       name: 'Vue-App-Content.1',
-      value: 0,
+      value: 100,
       interval: {},
       elaspsed: null,
       timer: {
         start: null,
         running: false,
         duration: 60,
-        color: 'teal',
-        icon: 'fa-android'
+        color: '#925636',
+        icon: 'fa-optin-monster'
       }
     }
   },
@@ -49,10 +48,12 @@ export default {
     this.interval = setInterval(() => {
       if (this.timer.running) {
         const now = new Date().getTime() / 1000
-        let s = Math.floor(now - this.timer.start)
+        let s = this.timer.duration - Math.floor(now - this.timer.start)
         this.elaspsed = (s - (s %= 60)) / 60 + (s > 9 ? ':' : ':0') + s
-        this.value = (100 * (now - this.timer.start)) / this.timer.duration
-        if (this.value >= 100) {
+        const nextValue = 100 - ((100 * (now - this.timer.start)) / this.timer.duration)
+        this.value = nextValue
+        if (nextValue <= 0) {
+          this.value = 0
           this.pauseTimer()
         }
       }
@@ -65,6 +66,7 @@ export default {
         this.timer.duration = message.duration
       }
       if (message.icon) {
+        console.log(message.icon)
         this.timer.icon = message.icon
       }
       if (message.color) {
@@ -82,7 +84,7 @@ export default {
   methods: {
     startTimer: function () {
       console.log('start')
-      this.value = 0
+      this.value = 100
       this.elaspsed = null
       this.timer.running = true
       this.timer.start = new Date().getTime() / 1000
@@ -93,7 +95,7 @@ export default {
     },
     stopTimer: function () {
       console.log('stop')
-      this.value = 0
+      this.value = 100
       this.elaspsed = null
       this.timer.running = false
       this.timer.start = null

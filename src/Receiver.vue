@@ -11,10 +11,10 @@
       <v-btn @click="onEvent({ data: {debug: !debug.enabled}})">Debug</v-btn>
       <v-btn @click="onEvent({ data: {message: 'test', app: 'app1'}})">Send</v-btn>
       <v-btn flat icon @click="onEvent({ data: {action: 'start', app: 'app1'}})"><v-icon>fas fa-play</v-icon></v-btn>
-      <v-btn flat icon @click="onEvent({ data: {action: 'pause', app: 'app1'}})"><v-icon>fa-pause</v-icon></v-btn>
-      <v-btn flat icon @click="onEvent({ data: {action: 'stop', app: 'app1'}})"><v-icon>fa-stop</v-icon></v-btn>
-      <v-btn @click="onEvent({ data: {color: 'pink', app: 'app1'}})">Color</v-btn>
-      <v-btn @click="onEvent({ data: {icon: 'fa-meh', app: 'app1'}})">Icon</v-btn>
+      <v-btn flat icon @click="onEvent({ data: {action: 'pause', app: 'app1'}})"><v-icon>fas fa-pause</v-icon></v-btn>
+      <v-btn flat icon @click="onEvent({ data: {action: 'stop', app: 'app1'}})"><v-icon>fas fa-stop</v-icon></v-btn>
+      <v-btn @click="onEvent({ data: {color: '#154685', app: 'app1'}})">Color</v-btn>
+      <v-btn @click="onEvent({ data: {icon: 'build', app: 'app1'}})">Icon</v-btn>
       <v-btn @click="onEvent({ data: {select: 'app1'}})">Select</v-btn>
       <v-btn-toggle v-model="currentApp">
          <v-btn v-for="(a,i) in applications" flat :value="a.name" :key="a.name">
@@ -22,7 +22,7 @@
          </v-btn>
       </v-btn-toggle>
     </v-toolbar>
-    <v-content>
+    <v-content fill-height>
       <template v-for="(a) in applications">
         <component v-if="currentApp == a.name" 
         :is="a.component" 
